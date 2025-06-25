@@ -1,0 +1,80 @@
+MODULE traffic_light(r, g, y)
+VAR
+	State:{initi, redl, greenl, yellowl};
+
+ASSIGN
+	init(State):=initi;
+	next(State):=case
+		r: redl;
+		g: greenl;
+		y: yellowl;
+		TRUE: State;
+		esac;
+		
+MODULE people_light(r, g)
+VAR
+	State:{initi, redl, greenl};
+	
+ASSIGN
+	init(State):=initi;
+	next(State):=case
+		r: redl;
+		g: greenl;
+		TRUE: State;
+		esac;	
+	
+MODULE main
+VAR
+	initial: boolean;
+	pu: boolean;
+
+	
+	
+	rl1: boolean;		--FB2 output event
+	gl1: boolean;		--FB2 output event
+	yl1: boolean;		--FB2 output event
+	
+	rl2: boolean;		--FB3 output event
+	gl2: boolean;		--FB3 output event
+	yl2: boolean;		--FB3 output event
+	
+
+	
+	FB1: counter(initial);
+	FB2: traffic_light_controller(pu, (FB1.g2|FB1.y2), FB1.y1, FB1.g1, FB6.rl3);
+	FB3: traffic_light_controller(pu, (FB1.g1|FB1.y1), FB1.y2, FB1.g2, FB6.rl3);
+	FB4: traffic_light(FB2.r, FB2.g, FB2.y);
+	FB5: traffic_light(FB3.r, FB3.g, FB3.y);
+	FB6: people(pu);
+	FB7: people_light(FB6.rl3, FB6.gl3);
+	
+ASSIGN
+	init(initial):= TRUE;
+	
+	init(pu):= FALSE;
+	
+	next(pu):=case
+		((FB2.State=q0s1 & (!FB2.push & !FB2.red & !FB2.yellow & !FB2.green))&(FB3.State=q0s1 & (!FB3.push & !FB3.red & !FB3.yellow & !FB3.green))): {TRUE, FALSE};
+		TRUE: pu;
+		esac;
+	
+
+	
+
+	
+
+
+CTLSPEC AG !(FB4.State=greenl & FB5.State=greenl);
+CTLSPEC AG ((FB4.State=greenl|FB5.State=greenl) -> !(FB7.State=greenl));
+CTLSPEC AG ((FB7.State=greenl) -> (FB4.State=redl & FB5.State=redl));
+CTLSPEC EF FB4.State=greenl;
+CTLSPEC EF FB5.State=greenl;
+CTLSPEC EF FB4.State=redl;
+CTLSPEC EF FB5.State=redl;
+
+CTLSPEC EF FB4.State=yellowl;
+CTLSPEC EF FB5.State=yellowl;
+
+CTLSPEC EF pu;
+CTLSPEC EF FB7.State=greenl;
+CTLSPEC EF FB7.State=redl;

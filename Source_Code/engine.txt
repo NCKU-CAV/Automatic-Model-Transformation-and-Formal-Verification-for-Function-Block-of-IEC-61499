@@ -1,0 +1,165 @@
+FunctionBlock engine
+begin
+
+input_event Init up down ;
+
+output_event ec ;
+
+input_data 
+cv:-10..10
+cs:0..5
+set:0..5 ;
+
+output_data
+ds:-10..15 ;
+
+internal_variable
+r:0..5 ;
+
+ECC
+ebegin
+state q0 q1 q2 q3 ;
+
+transition ( 
+q0 Init q1
+q0 down q3 
+q0 up q2
+q1 TRUE q0 
+q2 TRUE q0 
+q3 TRUE q0 )
+
+action (
+	q0 {
+	}
+	q1 {
+		a1 [
+			state e1 done ;
+			transition (
+				e1 TRUE / r=set | done ;
+			)
+		]
+	}
+	q2 {
+		a1 [
+			state e1 e2 e3 done ;
+			transition (
+				e1 cs+cv<=5 / ds=cs+cv | e2 ;
+				e1 cs+cv>5 / ds=5 | e3 ;
+				e2 TRUE done ;
+				e3 TRUE done ;
+			)
+			output_event ec ;
+		]
+	}
+	q3 {
+		a1 [
+			state e1 e2 e3 done ;
+			transition (
+				e1 cs-cv>=0 / ds=cs-cv | e2 ;
+				e1 cs-cv<0 / ds=0 | e3 ;
+				e2 TRUE done ;
+				e3 TRUE done ;
+			)
+			output_event ec ;
+		]
+	}
+)
+
+
+eend
+
+end
+
+
+FunctionBlock controller
+begin
+
+input_event Init Accel Decel Resume ;
+
+output_event Inito up down ;
+
+input_data 
+cs:0..5
+rs:0..5 ;
+
+output_data
+cv:-10..10
+rso:0..5 ;
+
+internal_variable
+r:0..5 ;
+
+ECC
+ebegin
+state q0 q1 q2 q3 q4 q5 q6 ;
+
+transition ( 
+q0 Init q1
+q0 Resume q3 
+q0 Accel q2
+q0 Decel q6
+q1 TRUE q0 
+q2 TRUE q0 
+q6 TRUE q0
+q3 cs>=rs q4
+q3 cs<rs q5
+q4 TRUE q0
+q5 TRUE q0 )
+
+action (
+	q0 {
+	}
+	q1 {
+		a1 [
+			state e1 done ;
+			transition (
+				e1 TRUE / r=rs rso=rs | done ;
+			)
+			output_event Inito ;
+		]
+	}
+	q2 {
+		a1 [
+			state e1 done ;
+			transition (
+				e1 TRUE / cv=1 | done ;
+			)
+			output_event up ;
+		]
+	}
+	q3 {
+	}
+	q4 {
+		a1 [
+			state e1 done ;
+			transition (
+				e1 TRUE / cv=cs-rs | done ;
+			)
+			output_event down ;
+		]
+	}
+	q5 {
+		a1 [
+			state e1 done ;
+			transition (
+				e1 TRUE / cv=rs-cs | done ;
+			)
+			output_event up ;
+		]
+	}
+	q6 {
+		a1 [
+			state e1 done ;
+			transition (
+				e1 TRUE / cv=1 | done ;
+			)
+			output_event down ;
+		]
+	}
+)
+
+
+eend
+
+end
+

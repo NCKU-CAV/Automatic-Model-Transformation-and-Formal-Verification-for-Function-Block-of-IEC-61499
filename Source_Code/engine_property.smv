@@ -1,0 +1,168 @@
+MODULE EI_pri(Init, Accel, Decel, Resume)
+VAR
+	Inito: boolean;
+	accelo: boolean;
+	decelo: boolean;
+	resumeo: boolean;
+
+ASSIGN
+	init(Inito):=FALSE;
+	next(Inito):=case
+		Init: TRUE;
+		Resume: FALSE;
+		Accel: FALSE;
+		Decel: FALSE;
+		Inito: FALSE;
+		TRUE: Inito;
+		esac;
+	init(resumeo):=FALSE;
+	next(resumeo):=case
+		Init: FALSE;
+		Resume: TRUE;
+		Accel: FALSE;
+		Decel: FALSE;
+		resumeo: FALSE;
+		TRUE: resumeo;
+		esac;
+	init(accelo):=FALSE;
+	next(accelo):=case
+		Init: FALSE;
+		Resume: FALSE;
+		Accel: TRUE;
+		Decel: FALSE;
+		accelo: FALSE;
+		TRUE: accelo;
+		esac;
+	init(decelo):=FALSE;
+	next(decelo):=case
+		Init: FALSE;
+		Resume: FALSE;
+		Accel: FALSE;
+		Decel: TRUE;
+		decelo: FALSE;
+		TRUE: decelo;
+		esac;
+
+	
+MODULE ed_asso(Init, Accel, Decel, Resume, rs, cs)
+VAR
+	rso: 0..5;
+	cso: 0..5;
+	
+	rspass: boolean;
+	cspass: boolean;
+	
+ASSIGN
+
+	init(rspass):=FALSE;
+	next(rspass):=case
+		Init: TRUE;
+		Resume: FALSE;
+		Accel: FALSE;
+		Decel: FALSE;
+		rspass: FALSE;
+		TRUE: rspass;
+		esac;
+		
+	init(cspass):=FALSE;
+	next(cspass):=case
+		Init: FALSE;
+		Resume: TRUE;
+		Accel: TRUE;
+		Decel: TRUE;
+		cspass: FALSE;
+		TRUE: cspass;
+		esac;
+	
+	
+	init(rso):=0;
+	next(rso):=case
+		Init: rs;
+		Resume: rso;
+		Accel: rso;
+		Decel: rso;
+		TRUE: rso;
+		esac;
+	init(cso):=0;
+	next(cso):=case
+		Init: cso;
+		Resume: cs;
+		Accel: cs;
+		Decel: cs;
+		TRUE: cso;
+		esac;
+		
+MODULE test_buffer1(rso)
+VAR
+	t1:0..5;
+
+ASSIGN
+	init(t1):=0;
+	next(t1):=rso;
+
+	
+MODULE test_buffer2(cso)
+VAR
+	t2:0..5;
+
+ASSIGN
+	init(t2):=0;
+	next(t2):=cso;
+
+MODULE main
+VAR
+	Init: boolean;
+	Accel: boolean;
+	Decel: boolean;	
+	Resume: boolean;
+	
+	cs:0..5;
+	rs:0..5;
+	
+	
+	--FB1EI: EI_pri(Init, Resume, Accel, Decel);
+	
+	--FB1ed: ed_asso(Init, Accel, Decel, Resume, rs, cs);
+	
+	--FB1: controller(FB1EI.Inito, FB1EI.accelo, FB1EI.decelo, FB1EI.resumeo, FB1ed.cso, FB1ed.rso);
+	
+	--buf1: test_buffer1(rs);
+	--buf2: test_buffer2(cs);
+	
+	FB1: controller(Init, Accel, Decel, Resume, cs, rs);
+	
+	FB2: engine(FB1.Inito, FB1.up, FB1.down, FB1.cv, cs, FB1.rso);
+
+
+ASSIGN
+	
+	next(cs):=case
+		cs=cs: cs;
+		TRUE: cs;
+		esac;
+		
+
+--CTLSPEC AG ((FB2.ds<=5)&(FB2.ds>=0));
+
+CTLSPEC (FB1.Resume -> EF FB2.ds = FB2.r);
+CTLSPEC (FB1.Accel & cs<5 -> EF FB2.ds = cs + 1);
+CTLSPEC (FB1.Decel & cs>0 -> EF FB2.ds = cs - 1);
+--CTLSPEC AG(FB1.Init -> EF FB2.set = FB2.r);
+
+--CTLSPEC AG(FB1EI.Inito -> FB1ed.rso=buf1.t1);
+--CTLSPEC	AG(FB1EI.Inito -> !FB1ed.cspass);
+
+--CTLSPEC	AG(FB1EI.accelo -> FB1ed.cso=buf2.t2);
+--CTLSPEC	AG(FB1EI.accelo -> !FB1ed.rspass);
+
+--CTLSPEC AG(FB2.cv>=0);
+--CTLSPEC AG(FB2.State!=q3s0);
+--CTLSPEC AG(FB2.State!=q2s0);
+--CTLSPEC AG(FB2.Inito -> FB2.r=FB2.rs & FB2.rso=FB2.rs );
+
+		
+--CTLSPEC AG(FB1.Init -> EF FB1.r=FB1.set);
+
+
+--CTLSPEC AG(FB1.State=q2a1e1 & (FB1.cs+FB1.cv <=5)-> ABF 0..6 FB1.ds=FB1.cs+FB1.cv);
+--CTLSPEC AG(FB1.State=q3a1e1 & (FB1.cs - FB1.cv >= 0)-> ABF 0..6 FB1.ds=FB1.cs - FB1.cv);

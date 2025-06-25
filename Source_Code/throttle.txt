@@ -1,0 +1,60 @@
+FunctionBlock throttle
+begin
+
+input_event cruiseOff cruiseOn speedSet clock accelPressed accelReleased ;
+
+output_event throttleChg ;
+
+input_data 
+cruiseSpeed:0..5
+speed:0..5 
+throttleOffset:-1..1 ;
+
+output_data
+throttleVal:0..5 ;
+
+internal_variable
+s:0..5 ;
+
+ECC
+ebegin
+state q0 q1 q2 ;
+
+transition ( 
+q0 cruiseOn q1
+q1 cruiseOff q0
+q1 accelPressed q2
+q2 cruiseOff q0
+q2 accelReleased q1
+ )
+
+action (
+	q0 {
+		a1 [
+			state e1 done ;
+			transition (
+				e1 (throttleVal+throttleOffset<6)&(throttleVal+throttleOffset>0) / throttleVal+throttleOffset s=throttleVal | done 
+				e1 throttleVal+throttleOffset=6 done
+				e1 throttleVal+throttleOffset=0 done ;
+			)
+			output_event throttleChg ;
+		]
+	}
+	q1 {
+	}
+	q2 {
+		a1 [
+			state e1 done ;
+			transition (
+				e1 s+1<6 / throttleVal=s+1 s=s+1 | done
+				e1 s+1=6 done ;
+			)
+			output_event throttleChg ;
+		]
+	}
+)
+
+
+eend
+
+end

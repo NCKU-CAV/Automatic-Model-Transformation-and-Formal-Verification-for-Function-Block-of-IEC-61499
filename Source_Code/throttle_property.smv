@@ -1,0 +1,28 @@
+MODULE main
+VAR
+	cruiseOff:boolean;
+	cruiseOn:boolean;
+	speedSet:boolean;
+	clock:boolean;
+	accelPressed:boolean;
+	accelReleased:boolean;
+	
+	cruiseSpeed:0..5;
+	speed:0..5;
+	throttleOffset:-1..1;
+	
+	FB1: throttle(cruiseOff, cruiseOn, speedSet, clock, accelPressed, accelReleased, cruiseSpeed, speed, throttleOffset);
+
+	
+ASSIGN
+
+	
+	next(cruiseSpeed):=cruiseSpeed;
+	
+	next(speed):=speed;
+	
+	next(throttleOffset):=throttleOffset;
+
+	
+CTLSPEC (FB1.State=q1s0 | FB1.State=q2s0) & FB1.cruiseOff -> EF (FB1.throttleVal=speed+throttleOffset);
+CTLSPEC FB1.State=q1s0 & FB1.accelPressed -> EF (FB1.throttleVal=FB1.s+1);

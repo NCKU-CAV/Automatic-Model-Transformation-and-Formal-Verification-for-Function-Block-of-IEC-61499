@@ -1,0 +1,168 @@
+FunctionBlock checker
+begin
+
+input_event che reche ;
+
+output_event up down keep ;
+
+input_data 
+temp:0..15 
+ntemp:0..15 ;
+
+output_data
+tempo:0..15 ;
+
+ECC
+ebegin
+state q0 q1 q2 q3 q4 q5 q6 q7 ;
+
+transition ( 
+q0 che q1
+q0 reche q5 
+
+q1 temp>10 q2
+q1 temp<5 q3
+q1 (temp>=5)&(temp<=10) q4
+
+q2 TRUE q0 
+q3 TRUE q0 
+q4 TRUE q0 
+
+q5 ntemp>10 q6
+q5 ntemp<5 q7
+q5 (ntemp>=5)&(ntemp<=10) q4
+
+
+q6 TRUE q0 
+q7 TRUE q0 
+
+)
+
+action (
+	q0 {
+	}
+	q1 {
+	}
+	q2 {
+		a1 [
+			state e1 done ;
+			transition (
+				e1 TRUE / tempo=temp | done ;
+			)
+			output_event down ;
+		]
+	}
+	q3 {
+		a1 [
+			state e1 done ;
+			transition (
+				e1 TRUE / tempo=temp | done ;
+			)
+			output_event up ;
+		]
+	}
+	q4 {
+		a1 [
+			state e1 done ;
+			transition (
+				e1 TRUE done ;
+			)
+			output_event keep ;
+		]
+	}
+	q5 {
+	}
+	q6 {
+		a1 [
+			state e1 done ;
+			transition (
+				e1 TRUE / tempo=ntemp | done ;
+			)
+			output_event down ;
+		]
+	}
+	q7 {
+		a1 [
+			state e1 done ;
+			transition (
+				e1 TRUE / tempo=ntemp | done ;
+			)
+			output_event up ;
+		]
+	}
+)
+
+
+eend
+
+end
+
+
+FunctionBlock adjustment
+begin
+
+input_event up down keep ;
+
+output_event r g ;
+
+input_data 
+temp:0..15 ;
+
+output_data
+tempo:0..15 ;
+
+ECC
+ebegin
+state q0 q1 q2 q3 ;
+
+transition ( 
+q0 keep q3
+q0 up q1 
+q0 down q2
+q1 TRUE q0 
+q2 TRUE q0 
+q3 TRUE q0 )
+
+action (
+	q0 {
+	}
+	q1 {
+		a1 [
+			state e1 e2 e3 done ;
+			transition (
+				e1 temp<15 / tempo=temp+1 | e2 ;
+				e1 temp=15 / tempo=15 | e3 ;
+				e2 TRUE done ;
+				e3 TRUE done ;
+			)
+			output_event r ;
+		]
+	}
+	q2 {
+		a1 [
+			state e1 e2 e3 done ;
+			transition (
+				e1 temp>0 / tempo=temp-1 | e2 ;
+				e1 temp=0 / tempo=0 | e3 ;
+				e2 TRUE done ;
+				e3 TRUE done ;
+			)
+			output_event r ;
+		]
+	}
+	q3 {
+		a1 [
+			state e1 done ;
+			transition (
+				e1 TRUE done ;
+			)
+			output_event g ;
+		]
+	}
+)
+
+
+eend
+
+end
+

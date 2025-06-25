@@ -1,0 +1,67 @@
+MODULE adj_buffer_up(up)
+VAR
+	upo:boolean;
+ASSIGN
+	init(upo):=FALSE;
+	next(upo):=up;
+
+MODULE adj_buffer_down(down)
+VAR
+	downo:boolean;
+ASSIGN
+	init(downo):=FALSE;
+	next(downo):=down;
+		
+MODULE adj_ed_association(up, down, keep, temp)
+VAR
+	tempo: 0..15;
+ASSIGN
+	next(tempo):=case
+		up: temp;
+		down: temp;
+		TRUE: tempo;
+		esac;
+
+MODULE test_buffer(tempo)
+VAR
+	tt:0..15;
+ASSIGN
+	next(tt):=tempo;
+	
+	
+MODULE main
+VAR
+	up: boolean;
+	down: boolean;
+	keep: boolean;	
+	
+	che: boolean;
+	reche: boolean;
+	
+	temp: 0..15;
+	
+	FB1: checker(che, FB2.r, temp, FB2.tempo);
+	
+	FB2ed: adj_ed_association(FB1.up, FB1.down, FB1.keep, FB1.tempo);
+	
+	FB2upb: adj_buffer_up(FB1.up);
+	
+	FB2downb: adj_buffer_down(FB1.down);
+	
+	buf: test_buffer(FB2ed.tempo);
+	
+	FB2: adjustment(FB2upb.upo, FB2downb.downo, FB1.keep, FB2ed.tempo);
+
+ASSIGN
+	init(che):=TRUE;
+	next(che):=FALSE;
+
+	
+	
+CTLSPEC AG(FB1.reche & (FB1.ntemp>10) -> EF FB1.ntemp=10);
+CTLSPEC AG(FB1.reche & (FB1.ntemp<5) -> EF FB1.ntemp=5);
+CTLSPEC AG(FB1.reche & (FB1.ntemp>=5) & (FB1.ntemp<=10) -> AG (FB1.ntemp>=5) & (FB1.ntemp<=10));
+
+CTLSPEC AG(FB2.up -> FB2ed.tempo=buf.tt);
+CTLSPEC	AG(FB2.down -> FB2ed.tempo=buf.tt);
+	

@@ -1,0 +1,225 @@
+FunctionBlock counter
+begin
+
+input_event Init ;
+
+output_event g1 y1 g2 y2 ;
+
+internal_variable
+c:0..10 ;
+
+ECC
+ebegin
+state q0 q1 q2 q3 q4 ;
+
+transition ( 
+q0 Init q1 
+q1 c=9 q2 
+q2 c=1 q3 
+q3 c=9 q4
+q4 c=1 q1 )
+
+action (
+	q0 {
+	}
+	q1 {
+		a1 [
+			state e1 done ;
+			transition (
+				e1 TRUE / c=0 | done ;
+			)
+			output_event g1 ;
+		]
+		a2 [
+			state e1 done ;
+			transition (
+				e1 c<9 / c=c+1 | e1 ;
+				e1 c=9 done ;
+			)
+		]
+	}
+	q2 {
+		a1 [
+			state e1 done ;
+			transition (
+				e1 TRUE / c=0 | done ;
+			)
+			output_event y1 ;
+		]
+		a2 [
+			state e1 done ;
+			transition (
+				e1 c<1 / c=c+1 | e1 ;
+				e1 c=1 done ;
+			)
+		]
+	}
+	q3 {
+		a1 [
+			state e1 done ;
+			transition (
+				e1 TRUE / c=0 | done ;
+			)
+			output_event g2 ;
+		]
+		a2 [
+			state e1 done ;
+			transition (
+				e1 c<9 / c=c+1 | e1 ;
+				e1 c=9 done ;
+			)
+		]
+	}
+	q4 {
+		a1 [
+			state e1 done ;
+			transition (
+				e1 TRUE / c=0 | done ;
+			)
+			output_event y2 ;
+		]
+		a2 [
+			state e1 done ;
+			transition (
+				e1 c<1 / c=c+1 | e1 ;
+				e1 c=1 done ;
+			)
+		]
+	}
+)
+
+
+eend
+
+end
+
+FunctionBlock traffic_light_controller
+begin
+
+input_event push red yellow green done ;
+output_event r g y ;
+
+internal_variable
+c:0..4 ;
+
+ECC
+ebegin
+
+state q0 q1 q2 q3 q4 ;
+transition (
+q0 push q4
+q0 red q1
+q0 green q2
+q0 yellow q3
+q4 done q0
+q1 TRUE q0
+q2 TRUE q0
+q3 TRUE q0
+)
+
+action (
+	q0 {
+	}
+	q1 {
+		a1 [
+			state e1 done ;
+			transition (
+				e1 TRUE done ;
+			)
+			output_event r ;
+		]
+	}
+	q2 {
+		a1 [
+			state e1 e2 done ;
+			transition (
+				e1 TRUE / c=0 | e2 ;
+				e2 c<4 / c=c+1 | e2 ;
+				e2 c=4 done ;
+			)
+			output_event g ;
+		]
+	}
+	q3 {
+		a1 [
+			state e1 done ;
+			transition (
+				e1 TRUE done ;
+			)
+			output_event y ;
+		]
+	}
+	q4 {
+		a1 [
+			state e1 done ;
+			transition (
+				e1 TRUE done ;
+			)
+			output_event r ;
+		]
+	}
+)
+
+eend
+
+end
+
+FunctionBlock people
+begin
+
+input_event push ;
+output_event gl3 rl3 ;
+
+internal_variable
+c:0..5 ;
+
+ECC
+ebegin
+state q0 q1 ; 
+transition (
+q0 push q1
+q1 TRUE q0
+)
+
+action (
+	q0 {
+	}
+	
+	q1 {
+		a0 [
+			state e1 e2 done ;
+			transition (
+				e1 TRUE / c=0 | e2 ;
+				e2 c<1 / c=c+1 | e2 ;
+				e2 c=1 done ;
+			)
+		
+		]
+		
+		a1 [
+			state e1 done ;
+			transition (
+				e1 TRUE / c=0 | done ;
+			)
+			output_event gl3 ;
+		]
+		a2 [
+			state e1 done ;
+			transition (
+				e1 c<5 / c=c+1 | e1 ;
+				e1 c=5 done ;
+			)
+			output_event rl3 ;
+		]
+	}
+)
+
+
+eend
+
+end
+
+
+
+
+
