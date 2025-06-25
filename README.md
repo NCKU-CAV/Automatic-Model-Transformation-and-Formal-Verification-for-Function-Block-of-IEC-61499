@@ -1,3 +1,13 @@
+## 👥 Authors
+
+- Chia-Hao Hsu   – Main developer and primary author
+- Yean-Ru Chen   - Co-author
+- Tien-Fu Li     - Co-author
+- Cheng-Yuan Lin - Co-author
+- Shao-Chia Weng - Co-author
+- Min-Yan Tsai   - Co-author
+  
+
 # Automatic-Model-Transformation-and-Formal-Verification-for-Function-Block-of-IEC-61499
 
 Method for creating a txt file​:
