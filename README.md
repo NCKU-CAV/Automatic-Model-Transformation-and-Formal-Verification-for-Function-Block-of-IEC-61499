@@ -16,6 +16,7 @@ For example, if the variable vi1 is of integer type and its range is from 0 to 1
 Ex.
 
 /////////////////////////////////////////
+
 input_event ei1 ei2;
 
 output_event eo1 eo2;
@@ -27,6 +28,7 @@ vi2 0..10;
 output_data
 vo1 0..20
 vo2 0..20;
+
 /////////////////////////////////////////
 
 
@@ -40,6 +42,7 @@ In the ECC, when multiple transitions share the same source state, a priority or
 Take Figure 4 as an example:
 
 /////////////////////////////////////////
+
 ECC
 
 state q0 q1 q2;
@@ -50,6 +53,7 @@ q0 ei2&(vi2=1) q2
 q1 vi1=1 q0
 q2 vi2=1 q0
 )
+
 ////////////////////////////////////////
 
 In the above case, there are two transitions from the source state q0. Since the transition (q0, ei1, q1) has a higher priority than (q0, ei2 ∧ (vi2 = 1), q2), we list (q0, ei1, q1) above the other.
@@ -62,6 +66,7 @@ After specifying the function block’s interface and the ECC, the designer must
 Generally, the internal operational behavior consists of multiple sub-behaviors executed sequentially, as defined by the user. Therefore, our main focus here is on how to model these various sub-behaviors. There are typically three types of sub-behaviors within an operational behavior: (1) a sub-behavior consisting of an event output, (2) a sub-behavior consisting of an algorithm, and (3) a sub-behavior consisting of both an algorithm and an event output. The sub-behaviors originally described in the ECC are first converted into FSM models. Again, take Figure 4 as an example:
 
 ////////////////////////////////////////
+
 action (
 	q0{
 	}
@@ -82,6 +87,7 @@ action (
 				e1 TRUE / vo2 = vi2 eo2=TRUE done;
 			)
 	}
+ 
 ////////////////////////////////////////
 
 In the example above, you can see that in state q1, the operational behaviors required for that state are specified. Here, a1 refers to an internal sub-behavior, executed in the order defined (top to bottom). The sub-behaviors originally associated with state q1 can be converted into an FSM model. When entering this model for the corresponding sub-behavior, it is mainly divided into states and transitions. There are two states: e1 and done. The initial state, e1, is written first, and the final state, done, is written last. For the transitions, enter the source state, condition, action, and destination state in sequence. In this case, it is entered as “e1 TRUE / vo1=vi1+vi2 eo1=TRUE done,” where the actions to be performed are specified after the “/”.
